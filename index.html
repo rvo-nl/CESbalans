@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/favicon.ico" />
+  <!-- Material Icons -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+  <!-- Roboto -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,600,700" />
+  <!-- Roboto Mono -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Mono" />
+  <link rel="stylesheet" href="/build/smui.css" />
+  <link rel="stylesheet" href="/app.css" />
+
+
+  <script src="/src/assets/js/d3.v7.min.js"></script>
+  <script src="/src/assets/js/d3.sankey.edit.js"></script>
+  <script src="/src/assets/js/ces.sankey.js"></script>
+  <script src="/src/assets/js/xlsx.js"></script>
+  <script src="/src/assets/js/dataloader.js"></script>
+
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Svelte + TS + Vite App</title>
+</head>
+
+<script>
+  var flag_CESCustomDatasetLoaded = false;
+  var CESCustomDataSet;
+  var processedDataSet = {};
+</script>
+
+<body>
+  <div id="app">
+    <div id="title"></div>
+    <div id="logo"></div>
+
+    <div id="header">
+      <div id="clusterSelector"></div>
+    </div>
+    <div id="main">
+      <div id="page"></div>
+    </div>
+    <div id="footer"></div>
+
+  </div>
+
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+
+</html>

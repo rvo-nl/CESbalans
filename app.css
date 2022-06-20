@@ -1,0 +1,208 @@
+html {
+
+  padding: 0;
+  margin: 0;
+
+}
+
+body {
+  /* background-color: #eceff1; */
+  /* height: auto; */
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  font-family: RijksoverheidSans;
+  font-size: 22px;
+  background-color: #fff;
+
+}
+
+#title {
+  z-index: 10;
+  width: 100%;
+  height: 150px;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  pointer-events: none;
+  /* background-color: rgba(100, 100, 100, 1); */
+}
+
+#app {
+  /* background-color: #eceff1; */
+  margin: 0;
+  /* display: block; */
+  /* position: absolute; */
+  /* overflow: auto; */
+  /* height: fit-content(20em); */
+  min-height: 4000px;
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  /* display: flex; */
+  /* flex-direction: column; */
+}
+
+#header {
+
+  position: sticky;
+  top: -30px;
+  /* position: -webkit-sticky; */
+
+  /* color: blue; */
+  background-color: rgba(256, 256, 256, 0.8);
+  width: 100%;
+  height: 100px;
+  z-index: 2;
+  /* overflow: visible; */
+}
+
+#logo {
+  pointer-events: none;
+  width: 100%;
+  position: absolute;
+  top: 0px;
+  z-index: 3;
+}
+
+
+#page {
+  height: auto;
+  border-width: 2px;
+  border-style: dashed;
+  border-color: black;
+  /* background-color: white; */
+  margin-top: 60px;
+  margin-left: 50%;
+  margin-bottom: 20px;
+
+  /* color: red; */
+  position: absolute;
+  left: -500px;
+  top: 140px;
+  /* max-height: 100%; */
+  /* min-height: 700px; */
+  /* overflow-y: scroll; */
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+}
+
+#footer {
+  background-color: rgba(256, 256, 256, 0.8);
+  box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
+  color: #333;
+  position: fixed;
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+  z-index: 10;
+  /* color: green; */
+  height: 40px;
+
+}
+
+#clusterSelector {
+  z-index: 10;
+  position: absolute;
+  /* width: 100%; */
+  top: 45px;
+  right: 50px;
+}
+
+
+.bar.total rect {
+  fill: #2C6697;
+}
+
+.bar.positive rect {
+  fill: #527C63;
+}
+
+.bar.negative rect {
+  fill: #78433B;
+}
+
+.bar.overlay rect {}
+
+.bar line.connector {
+  stroke: grey;
+  /* stroke-dasharray: 0; */
+  stroke-width: 1;
+}
+
+
+
+.bar text {
+  text-anchor: middle;
+}
+
+.axis text {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+div.tooltip {
+  position: absolute;
+  text-align: center;
+  width: 60px;
+  height: 16px;
+  padding: 2px;
+  font: 15px sans-serif;
+  background: lightgrey;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+
+@font-face {
+  font-family: "RijksoverheidSans";
+  src: url("/src/assets/fonts/ROsanswebtextregular.eot?") format("embedded-opentype"),
+    url("/src/assets/fonts/ROsanswebtextregular.woff") format("opentype");
+  font-style: normal;
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "RijksoverheidSans";
+  src: url("/src/assets/fonts/ROsanswebtextitalic.eot?") format("embedded-opentype"),
+    url("/src/assets/fonts/ROsanswebtextitalic.woff") format("opentype");
+  font-style: italic;
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "RijksoverheidSans";
+  src: url("/src/assets/onts/ROsanswebtextbold.eot?") format("embedded-opentype"),
+    url("/src/assets/fonts/ROsanswebtextbold.woff") format("opentype");
+  font-weight: bold;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "RijksoverheidSerif";
+  src: url("/src/assets/fonts/ROserifwebregular.eot?") format("embedded-opentype"),
+    url("/src/assets/fonts/ROserifwebregular.woff") format("opentype");
+  font-style: normal;
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "RijksoverheidSerif";
+  src: url("/src/assets/fonts/ROserifwebitalic.eot?") format("embedded-opentype"),
+    url("/src/assets/fonts/ROserifwebitalic.woff") format("opentype");
+  font-style: italic;
+  font-weight: normal;
+}
+
+@font-face {
+  font-family: "RijksoverheidSerif";
+  src: url("/src/assets/fonts/ROserifwebbold.eot?") format("embedded-opentype"),
+    url("/src/assets/fonts/ROserifwebbold.woff") format("opentype");
+  font-weight: bold;
+  font-style: normal;
+}
