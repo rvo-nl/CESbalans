@@ -24,4 +24,4 @@ dist-ssr
 *.sw?
 
 #non-public data
-src/assets/test.xlsx
+src/assets/private
