@@ -38,7 +38,7 @@ req.onload = function(e) {
   processData(rawDataInput)
 };
 req.send();
-setTimeout(godoit, 100); // DEZE AANPASSEN BIJ DEPLOY
+setTimeout(godoit, 1000); // DEZE AANPASSEN BIJ DEPLOY
 
 function godoit() {
   tekenCESDiagrammen({
