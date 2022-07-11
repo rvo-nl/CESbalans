@@ -1,19 +1,32 @@
 <script lang="ts">
   // import logo from "./assets/logo-ro-light.svg";
+
+  setTimeout(function () {
+    d3.select("#verticalLine")
+      .transition()
+      .duration(1000)
+      .style("height", "400px");
+  }, 100);
 </script>
 
 <!-- <p>Hallo</p> -->
-<div
-  style="width:4px; height:250px; position:absolute; left: 40px; top: 40px; background-color: #154273;"
-/>
 <p
-  style="position:absolute; top:10px; left: 70px; font-size:35px; font-weight: 800; color: #154273"
+  style="font-size:30px; font-weight: 800; color:
+  #154273; position:absolute; left:-500px; top:10px;"
 >
-  CES Energie & CO<sub>2</sub>-balans
+  Energie & CO<sub>2</sub>-balans
 </p>
-<p style="position:absolute; top:75px;left: 75px; font-size:15px; color:#888">
+<p id="subtitle" style="position:absolute;left:-498px; top:60px;">
+  Visualisatietoolkit
+</p>
+<div
+  class="center"
+  id="verticalLine"
+  style="z-index:10; position:relative; left:-550px; top:35px; width: 4px; height:0px; background-color: #154273;"
+/>
+<!-- <p style="position:absolute; toppx;left: 75px; font-size:15px; color:#888">
   Versie 20-6-2022
-</p>
+</p> -->
 
 <!-- <div style="margin-left:50%;"> -->
 <!-- <img src={logo} id="rijkslogo" alt="Logo Rijksoverheid" /> -->

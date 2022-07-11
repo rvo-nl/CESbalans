@@ -12,8 +12,8 @@ var diagramCanvas;
 var colorMap = { gas: '#8E8E8E', waterstofBlauw: '#85B4D5',waterstofGroen: '#91C6A8', elektriciteit: '#E7A35F', warmte: '#B66862', mix: '#DEB3C3' };
 
 let columnHeight = height + margin.top+margin.bottom -300;
-let columnStartPos = 290;
-let startposCO2balans = columnStartPos + 520;
+let columnStartPos = 105;//290+50;
+let startposCO2balans = 0//columnStartPos + 520;
 let startposNotes = startposCO2balans + 240;
 
 let refYposWFDEnergie_top = 0, refYposWFDEnergie_bottom = 0;
@@ -22,7 +22,30 @@ let CO2WFDiagramData = [], EnergieSubstitutieWFDiagramData =[], EnergieBesparing
 
 var clusterSelectie;
 
-function initCESDiagramVars(){
+var svgEnergiebalans;
+var svgCO2balans;
+
+setTimeout(function(){window.scrollTo(0, 0)},100)
+setTimeout(function(){window.scrollTo(0, 0)},200)
+
+
+
+function appendPatterns(){
+
+  var defs = d3.selectAll('svg').append('defs');
+      defs.append('pattern').attr('id', 'diagonal-stripe').attr('patternUnits','userSpaceOnUse').attr('width',10).attr('height',10).append('path').attr('d', 'M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2').style('stroke','white').style('stroke-width',2).attr('fill','black');
+      defs.append('pattern').attr('id', 'diagonal-stripe-red').attr('patternUnits','userSpaceOnUse').attr('width',10).attr('height',10).append('path').attr('d', 'M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2').style('stroke','#B66862').style('stroke-width',2).attr('fill','black');
+      defs.append('pattern').attr('id', 'diagonal-stripe-white').attr('patternUnits','userSpaceOnUse').attr('width',10).attr('height',10).append('path').attr('d', 'M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2').style('stroke','white').style('stroke-width',2).attr('fill','red');
+      
+      defs.append('pattern').attr('id', 'diagonal-stripe-purple').attr('patternUnits','userSpaceOnUse').attr('width',10).attr('height',10).append('path').attr('d', 'M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2').style('stroke','#9F264F').style('stroke-width',4).attr('fill','black');
+      defs.append('pattern').attr('id', 'diagonal-stripe-green').attr('patternUnits','userSpaceOnUse').attr('width',10).attr('height',10).append('path').attr('d', 'M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2').style('stroke','#527C63').style('stroke-width',4).attr('fill','black');
+      defs.append('pattern').attr('id', 'diagonal-stripe-yellow').attr('patternUnits','userSpaceOnUse').attr('width',10).attr('height',10).append('path').attr('d', 'M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2').style('stroke','#D8A980').style('stroke-width',4).attr('fill','black');
+      
+      defs.append('pattern').attr('id', 'dots').attr('patternUnits','userSpaceOnUse').attr('width',6).attr('height',6).append('circle').attr('cx',1.5).attr('cy',1.5).attr('r',0.6).attr('fill','')
+      defs.append('pattern').attr('id', 'dots2').attr('patternUnits','userSpaceOnUse').attr('width',6).attr('height',6).append('circle').attr('cx',1.5).attr('cy',1.5).attr('r',3).attr('fill','white')
+    }
+
+function initCESDiagramVars(config){
   d3.selectAll('#CESContentDiv').remove();
   CO2WFDiagramData = [];
   EnergieSubstitutieWFDiagramData =[];
@@ -30,60 +53,95 @@ function initCESDiagramVars(){
   regelCounter = 0;
   noteCounterArray = [];
   noteCounter = 0;
+
+   //diagram canvases
+   d3.select('#'+config.targetDiv).append('div')
+   .attr('id','CESContentDiv')
+   .style('position','relative').style('margin','auto')
+   .style('width','1000px')
+  //  .style('background-color','#e5eff5')
+   .style('width',width + margin.left + margin.right)
+   .style('height',height + margin.top + margin.bottom + height_textarea + 3000)
+
+  let resetContents = ['titel','versie','zichtjaar','referentiejaar','tekstAlgemeen','kopEnergiebalans','tekstEnergiebalans','figuurEnergiebalans','kopCO2balans','tekstCO2balans', 'figuurCO2balans','voetnoten']
+  
+  for(i=0;i<resetContents.length;i++){
+    d3.select('#' + resetContents[i]).remove();
+    d3.select('#CESContentDiv').append('div').attr('id',resetContents[i]).style('z-index',0);
+  }
 }
 
 
 function tekenCESDiagrammen(config){
   processData(rawDataInput);
   clusterSelectie = config.cluster;
-  initCESDiagramVars();  
+  initCESDiagramVars(config);  
 
   d3.select('#'+config.targetDiv).style('visibility','visible').style('pointer-events','all');
 
-  //diagram canvases
-  d3.select('#'+config.targetDiv).append('div')
-    .attr('id','CESContentDiv')
-    .style('position','relative').style('margin','auto')
-    .style('width','1000px')
-    .style('background-color','#e5eff5')
-    .style('width',width + margin.left + margin.right)
-    .style('height',height + margin.top + margin.bottom + height_textarea + 3000)
+ 
 
-    diagramCanvas = d3.select('#CESContentDiv').append("svg")
-        .style('position','relative')
-        .attr('id','sankeySVG')
+    // diagramCanvas = d3.select('#CESContentDiv').append("svg")
+    //     .style('position','relative')
+    //     .attr('id','sankeySVG')
+    //     .attr("width", width + margin.left + margin.right)
+    //     .attr("height", height + margin.top + margin.bottom + height_textarea + 3000)
+    //     .append("g")
+
+        svgEnergiebalans = d3.select('#figuurEnergiebalans').append("svg")
+        .attr('id','svgEnergiebalans')
+        // .style('background-color','blue')
+        .style('position','absolute')
+        .style('left','0px')
+        .style('top','0px')
         .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom + height_textarea + 3000)
+        .attr("height", height + margin.top + margin.bottom-130)
         .append("g")
+        // .attr("transform","translate(" + margin.left + "," + margin.top + ")");
+
+        svgCO2balans = d3.select('#figuurCO2balans').append("svg")
+        .attr('id','svgCO2balans')
+        // .style('background-color','grey')
+        .style('position','absolute')
+        .style('left','0px')
+        .style('top','0px')
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom-200)
+        .append("g")
+        // .attr("transform","translate(" + margin.left + "," + margin.top + ")");
+
+
+
+
 
     prepareDatasets(config);
     
     function prepareDatasets(config){
         let clusterSelectie = config.clusterSelectie;
 
+
             EnergieBesparingWFDiagramData = processedDataSet[clusterSelectie].besparing.staafdiagram
             EnergieSubstitutieWFDiagramData = processedDataSet[clusterSelectie].substitutie.watervaldiagram;
             CO2WFDiagramData = processedDataSet[clusterSelectie].CO2.watervaldiagram;
           
             drawBackdrop(config);
-            drawSankey(config);
-            drawWaterfallCO2(config);
-            // drawWaterfallEnergie(config);
+            drawSankey(config); //HIERO
+            drawWaterfallCO2(config); //HIERO
             setTimeout(drawNotes, 50); // quick & dirty, neaten routing later on
 
-            diagramCanvas.append('text')
-                .style('font-family', 'RijksoverheidSans').attr('font-size','300px').attr('font-weight',100).attr("text-anchor", "start")
-                .attr('x',-300).attr('y',800)
-                .attr('fill','black')
-                .style('opacity',0.1)
-                .attr('transform','rotate(-20)')
+            // diagramCanvas.append('text')
+            //     .style('font-family', 'RijksoverheidSans').attr('font-size','300px').attr('font-weight',100).attr("text-anchor", "start")
+            //     .attr('x',-300).attr('y',800)
+            //     .attr('fill','black')
+            //     .style('opacity',0.1)
+            //     .attr('transform','rotate(-20)')
                 // .text(function(){if (flag_CESCustomDatasetLoaded) { return 'CONCEPT';} else return 'DUMMY'});
-            diagramCanvas.append('text')
-                .style('font-family', 'RijksoverheidSans').attr('font-size','300px').attr('font-weight',100).attr("text-anchor", "start")
-                .attr('x',-500).attr('y',1300)
-                .attr('fill','black')
-                .style('opacity',0.1)
-                .attr('transform','rotate(-20)')
+            // diagramCanvas.append('text')
+            //     .style('font-family', 'RijksoverheidSans').attr('font-size','300px').attr('font-weight',100).attr("text-anchor", "start")
+            //     .attr('x',-500).attr('y',1300)
+            //     .attr('fill','black')
+            //     .style('opacity',0.1)
+            //     .attr('transform','rotate(-20)')
                 // .text(function(){if (flag_CESCustomDatasetLoaded) { return 'CONCEPT';} else return 'DUMMY'});
         // });
     }
@@ -103,14 +161,14 @@ function drawBackdrop(){
     function drawSankeyGraphElements(){
         
         //Wit vlak voor energiebalans
-        diagramCanvas.append('rect')
+        svgEnergiebalans.append('rect')
             .attr('height',610).attr('width',980)
             .attr('fill','#FFF').style('opacity',1)
-            .attr('x',10).attr('y',180)
+            .attr('x',10).attr('y',columnStartPos-105)
             .attr('rx',10).attr('ry',10)
         
          //Wit vlak voor CO2-balans
-        diagramCanvas.append('rect')
+        svgCO2balans.append('rect')
             .attr('height',525).attr('width',980)
             .attr('fill','#FFF').style('opacity',1)
             .attr('x',10).attr('y',startposCO2balans)
@@ -118,121 +176,132 @@ function drawBackdrop(){
     
         
     
-        diagramCanvas.append('rect')
-            .attr('height',80).attr('width',width+margin.left+margin.right)
-            .attr('fill','none').style('opacity',1)
-            .attr('x',0).attr('y',0)
+        // diagramCanvas.append('rect')
+        //     .attr('height',80).attr('width',width+margin.left+margin.right)
+        //     .attr('fill','none').style('opacity',1)
+        //     .attr('x',0).attr('y',0)
+
+        var columnBackdropColor = '#eceff1'; //'#e5eff5'/
     
-        diagramCanvas.append('rect')
+        //backdropkolom toepassing
+        svgEnergiebalans.append('rect')
             .attr('height',columnHeight-55).attr('width',columnWidth1)
-            .attr('fill','#e5eff5')
+            .attr('fill',columnBackdropColor)
             .attr('x',xposColumn1).attr('y',columnStartPos+30)
             .style('border-bottom-left-radius',10)
     
-        diagramCanvas.append('rect')
+        //backdropkolom conversie
+        svgEnergiebalans.append('rect')
             .attr('height',columnHeight-55).attr('width',columnWidth2)
-            .attr('fill','#e5eff5')
+            .attr('fill',columnBackdropColor)
             .attr('x',xposColumn2).attr('y',columnStartPos+30)
     
-        diagramCanvas.append('rect')
+        //backdropkolom bronnen
+        svgEnergiebalans.append('rect')
             .attr('height',columnHeight-55).attr('width',columnWidth3)
-            .attr('fill','#e5eff5')
+            .attr('fill',columnBackdropColor)
             .attr('x',xposColumn3).attr('y',columnStartPos+30)
     
-        diagramCanvas.append('rect') //col 4
+        //backdropkolom substitutie en balans
+        svgEnergiebalans.append('rect') //col 4
             .attr('height',columnHeight-55).attr('width',columnWidth4-110)
-            .attr('fill','#e5eff5')
+            .attr('fill',columnBackdropColor)
             .attr('x',xposColumn4 +20).attr('y',columnStartPos+30)
         
-        diagramCanvas.append('rect') //col 5
+        //backdropkolom besparing
+        svgEnergiebalans.append('rect') //col 5
             .attr('height',columnHeight-55).attr('width',columnWidth5-83)
-            .attr('fill','#e5eff5')
+            .attr('fill',columnBackdropColor)
             .attr('x',xposColumn5-70).attr('y',columnStartPos+30)
             
-        diagramCanvas.append("text")
+        svgEnergiebalans.append("text")
             .attr('x',xposColumn0).attr('y',columnStartPos-70)
             .style('font-family', 'RijksoverheidSans').style('font-size', 20+'px').style('font-weight',800).attr("text-anchor", "start")
             .attr('fill','black')
             .text('Energiebalans')
     
-        diagramCanvas.append('rect')
+        //divider streep onder 'Mutaties in energieverbruik'
+        svgEnergiebalans.append('rect')
             .attr('height',3).attr('width',803)
             .attr('fill','#333').style('opacity',1)
-            .attr('x',xposColumn1).attr('y',274)
+            .attr('x',xposColumn1).attr('y',columnStartPos-15)
     
-        diagramCanvas.append("text")
+        svgEnergiebalans.append("text")
             .attr('x',xposColumn1).attr('y',columnStartPos-30)
             .style('font-family', 'RijksoverheidSans').style('font-size', 16+'px').style('font-weight',400).attr("text-anchor", "start")
             .attr('fill','black')
             .text('Mutaties in energieverbruik')
     
-        diagramCanvas.append('text')
+        svgEnergiebalans.append('text')
             .attr('id','eenheid_energie')
-            .attr('x',970).attr('y',216)
+            .attr('x',970).attr('y',columnStartPos-75)
             .style('font-family', 'RijksoverheidSans').style('font-size', 14+'px').style('font-weight',400).attr("text-anchor", "end")
             .attr('fill','black')
             .text('Eenheid:')
     
-        diagramCanvas.append('text')
+        svgCO2balans.append('text')
             .attr('id','eenheid_co2')
             .attr('x',970).attr('y',startposCO2balans+35)
             .style('font-family', 'RijksoverheidSans').style('font-size', 14+'px').style('font-weight',400).attr("text-anchor", "end")
             .attr('fill','black')
             .text('Eenheid:')
     
-        diagramCanvas.append('rect')
+        //divider streep kolom 'Toepassing'
+        svgEnergiebalans.append('rect')
             .attr('height',3).attr('width',columnWidth1)
             .attr('fill','#333').style('opacity',1)
-            .attr('x',xposColumn1).attr('y',319)
+            .attr('x',xposColumn1).attr('y',columnStartPos+30)
     
-        diagramCanvas.append("text")
+        svgEnergiebalans.append("text")
             .attr('x',xposColumn1).attr('y',columnStartPos +15)
             .style('font-family', 'RijksoverheidSans').style('font-size', 16+'px').style('font-weight',400).attr("text-anchor", "start")
             .attr('fill','black')
             .text('Toepassing')
     
-        diagramCanvas.append('rect')
+        //divider streep kolom 'Conversie'
+        svgEnergiebalans.append('rect')
             .attr('height',3).attr('width',columnWidth2)
             .attr('fill','#333').style('opacity',1)
-            .attr('x',xposColumn2).attr('y',319)
+            .attr('x',xposColumn2).attr('y',columnStartPos+30)
     
-        diagramCanvas.append("text")
+        svgEnergiebalans.append("text")
             .attr('x',xposColumn2).attr('y',columnStartPos +15)
             .style('font-family', 'RijksoverheidSans').style('font-size', 16+'px').style('font-weight',200).attr("text-anchor", "start")
             .attr('fill','black')
             .text('Conversie')
     
-        diagramCanvas.append('rect')
+        //divider streep kolom 'Bronnen'
+        svgEnergiebalans.append('rect')
             .attr('height',3).attr('width',columnWidth3)
             .attr('fill','#333').style('opacity',1)
-            .attr('x',xposColumn3).attr('y',319)
+            .attr('x',xposColumn3).attr('y',columnStartPos+30)
     
-        diagramCanvas.append("text")
+        svgEnergiebalans.append("text")
             .attr('x',xposColumn3).attr('y',columnStartPos + 15)
             .style('font-family', 'RijksoverheidSans').style('font-size', 16+'px').style('font-weight',200).attr("text-anchor", "start")
             .attr('fill','black')
             .text('Bronnen')
     
-        diagramCanvas.append("text")
-            .attr('id','hoofdTitel')
-            .attr('x',10).attr('y',50)
-            .style('font-family', 'RijksoverheidSans') .style('font-size', 28+'px').style('font-weight',800).attr("text-anchor", "start")
-            .attr('fill','black')
-            .text('Hoofdtitel')
+        // diagramCanvas.append("text")
+        //     .attr('id','hoofdTitel')
+        //     .attr('x',10).attr('y',50)
+        //     .style('font-family', 'RijksoverheidSans') .style('font-size', 28+'px').style('font-weight',800).attr("text-anchor", "start")
+        //     .attr('fill','black')
+        //     .text('Hoofdtitel')
             
-        diagramCanvas.append("text")
-            .attr('id','subTitel')
-            .attr('x',10).attr('y',64)
-            .style('font-family', 'RijksoverheidSans').style('font-size', 15+'px').style('font-weight',200).attr("text-anchor", "start")
-            .attr('fill','black')
-            .text('Subtitel')
+        // diagramCanvas.append("text")
+        //     .attr('id','subTitel')
+        //     .attr('x',10).attr('y',64)
+        //     .style('font-family', 'RijksoverheidSans').style('font-size', 20+'px').style('font-weight',200).attr("text-anchor", "start")
+        //     .attr('fill','black')
+        //     .text('Subtitel')
     
-        diagramCanvas.append("text")
-            .attr('id','diagramVersie')
-            .attr('x',33).attr('y',65)
-            .style('font-family', 'RijksoverheidSans').style('font-size', 12+'px').style('font-weight',200).attr("text-anchor", "start")
-            .attr('fill','black')
-            .text('versie diagram: ')
+        // diagramCanvas.append("text")
+        //     .attr('id','diagramVersie')
+        //     .attr('x',33).attr('y',65)
+        //     .style('font-family', 'RijksoverheidSans').style('font-size', 12+'px').style('font-weight',200).attr("text-anchor", "start")
+        //     .attr('fill','black')
+        //     .text('versie diagram: ')
     }
 
     drawWaterfallGraphElementsCO2balans();
@@ -257,47 +326,47 @@ function drawBackdrop(){
                                 {title: 'Nieuwe bedrijven', scope: ' '}
                             ]
     
-        diagramCanvas.append('rect')
+        svgCO2balans.append('rect')
             .attr('height',420).attr('width',940)
-            .attr('fill','#e5eff5').style('opacity',1)
+            .attr('fill','#eceff1').style('opacity',1)
             .attr('x',30).attr('y',spos+60)
     
         let scopeColors = {scope0: ' ',scope1:'#545454',scope2:'#C3C3C3',scope3:'#FFF'}
     
-        diagramCanvas.append('rect')
+        svgCO2balans.append('rect')
             .attr('height',2).attr('width',293)
             .attr('fill',scopeColors.scope1).style('opacity',1)
             .attr('x',161).attr('y',spos + 110)
             .attr('rx',2).attr('ry',2)
     
-        diagramCanvas.append('rect')
+        svgCO2balans.append('rect')
             .attr('height',2).attr('width',157)
             .attr('fill',scopeColors.scope1).style('opacity',1)
             .attr('x',481).attr('y',spos + 110)
             .attr('rx',2).attr('ry',2)
-        diagramCanvas.append('rect')
+        svgCO2balans.append('rect')
             .attr('height',2).attr('width',154)
             .attr('fill',scopeColors.scope1).style('opacity',1)
             .attr('x',661).attr('y',spos + 110)
             .attr('rx',2).attr('ry',2)
-        diagramCanvas.append("text")
+        svgCO2balans.append("text")
             .attr('x',165).attr('y',spos+95)
             .style('font-family', 'RijksoverheidSans').style('font-size', 16+'px').style('font-weight',400).attr("text-anchor", "start")
             .attr('fill','black')
             .text('Scope 1 emissies')
-        diagramCanvas.append("text")
+        svgCO2balans.append("text")
             .attr('x',485).attr('y',spos+95)
             .style('font-family', 'RijksoverheidSans').style('font-size', 16+'px').style('font-weight',400).attr("text-anchor", "start")
             .attr('fill','black')
             .text('Scope 2 emissies')
-        diagramCanvas.append("text")
+        svgCO2balans.append("text")
             .attr('x',663).attr('y',spos+95)
             .style('font-family', 'RijksoverheidSans').style('font-size', 16+'px').style('font-weight',400).attr("text-anchor", "start")
             .attr('fill','black')
             .text('Scope 3 emissies')
     
         ypos = spos + 340;
-        diagramCanvas.append("text")
+        svgCO2balans.append("text")
             .style('font-family', 'RijksoverheidSans').style('font-size', 13+'px').style('font-weight',400).attr("text-anchor", "start")
             .attr('fill','black')
             .text('CO2-emissiereductie (Mton)')
@@ -308,7 +377,7 @@ function drawBackdrop(){
     
         for (i=0;i<co2BalansItems.length+1;i++){
             posx = i*45+161;
-            diagramCanvas.append('rect')
+            svgCO2balans.append('rect')
                 .attr('height',180).attr('width',25)
                 .attr('fill',backdropcolorarray[i]).style('opacity',1)
                 .attr('x',posx).attr('y',spos+175)            
@@ -316,7 +385,7 @@ function drawBackdrop(){
             
             posy = spos + 336;
             posx = i*45 + 170;
-            diagramCanvas.append('rect')
+            svgCO2balans.append('rect')
                 .attr('rx',5).attr('ry',5)
                 .attr('width',25).attr('height',155)
                 .attr('fill',backdropcolorarray[i]).style('opacity',1)
@@ -325,7 +394,7 @@ function drawBackdrop(){
     
             posx = posx - 95;
             posy = posy +115;
-            diagramCanvas.append('text')
+            svgCO2balans.append('text')
                 .attr('x',0).attr('y',0)
                 .style('font-family', 'RijksoverheidSans').style('font-size', 14+'px').style('font-weight',function(){if (i<co2BalansItems.length){return 200;} else return 800;}).attr("text-anchor", "start")
                 .attr('fill','#666')
@@ -336,15 +405,15 @@ function drawBackdrop(){
             posy = spos + 135;
             posx = i*45+174.5;
             if (i<co2BalansItems.length-1){
-            diagramCanvas.append('circle')
+            svgCO2balans.append('circle')
                 .attr('cx',posx).attr('cy',posy)
-                .attr('r',10)
+                .attr('r',15)
                 .attr('fill',function(){return scopeColors['scope'+co2BalansItems[i].scope]})
                 
     
             posx = posx - 4;
             posy = posy + 4
-            diagramCanvas.append('text')            
+            svgCO2balans.append('text')            
                 .style('font-family', 'RijksoverheidSans').style('font-size', 14+'px').style('font-weight',800).attr("text-anchor", "start")
                 .attr('fill',function(){if (co2BalansItems[i].scope == 1 || co2BalansItems[i].scope == 2){return 'white';} else return 'black'})
                 .style('transform-origin', '0% 0%')
@@ -354,7 +423,7 @@ function drawBackdrop(){
         }
     
     
-        diagramCanvas.append('rect')
+        svgCO2balans.append('rect')
             .attr('x',147).attr('y',spos + 339.5)
             .attr('height',1).attr('width',765)
             .attr('fill','#333').style('opacity',1)
@@ -368,24 +437,24 @@ function drawBackdrop(){
     
         let shiftRight = 625;
         
-        diagramCanvas.append('rect')
+        svgEnergiebalans.append('rect')
             .attr('x',37 + shiftRight).attr('y',spos + 29)
             .attr('height',3).attr('width',170)
             .attr('fill','black').style('opacity',1)
             
             
-        diagramCanvas.append("text")
+        svgEnergiebalans.append("text")
             .attr('x',shiftRight + 41).attr('y',spos+15)
             .attr('fill','black')
             .style('font-family', 'RijksoverheidSans').style('font-size', 16+'px').style('font-weight',400).attr("text-anchor", "start")
             .text('Substitutie en balans')
     
-        diagramCanvas.append('rect')
+        svgEnergiebalans.append('rect')
             .attr('height',3).attr('width',117)
             .attr('fill','black').style('opacity',1)
             .attr('x',shiftRight + 227).attr('y',spos + 29)
             
-        diagramCanvas.append("text")
+        svgEnergiebalans.append("text")
             .attr('x',226+ shiftRight).attr('y',spos+15)
             .style('font-family', 'RijksoverheidSans').style('font-size', 16+'px').style('font-weight',400).attr("text-anchor", "start")
             .attr('fill','black')
@@ -395,13 +464,13 @@ function drawBackdrop(){
             var distance = 26;
             posx = i*distance + 179 + shiftRight;
             posy = spos + 222;
-            diagramCanvas.append('rect')
+            svgEnergiebalans.append('rect')
                 .attr('height',390).attr('width',18)
                 .attr('fill','#F4F9FB').style('opacity',1)
                 .attr('x',posx).attr('y',posy-175)
                 .attr('rx',10).attr('ry',10)
     
-            diagramCanvas.append('rect')
+            svgEnergiebalans.append('rect')
                 .attr('height',390).attr('width',18)
                 .attr('fill','#FFF').style('opacity',1)
                 .attr('x',posx).attr('y',posy-175)
@@ -409,7 +478,7 @@ function drawBackdrop(){
     
             posx = posx + 14;
             posy = posy - 85;
-            diagramCanvas.append('text')
+            svgEnergiebalans.append('text')
                 .attr('x',0).attr('y',0)
                 .style('font-family', 'RijksoverheidSans').style('font-size', 13+'px').style('font-weight',800).attr("text-anchor", "start")
                 .attr('fill','#666')
@@ -421,7 +490,7 @@ function drawBackdrop(){
             var distance = 25;
             posx = i*distance + 76 + shiftRight;
             posy = spos + 222;
-            diagramCanvas.append('rect')
+            svgEnergiebalans.append('rect')
                 .attr('height',390).attr('width',18)
                 .attr('fill','#F4F9FB').style('opacity',1)
                 .attr('x',posx).attr('y',posy-175)
@@ -429,7 +498,7 @@ function drawBackdrop(){
     
             posx = posx + 14;
             posy = posy - 100;
-            diagramCanvas.append('text')
+            svgEnergiebalans.append('text')
                 .attr('x',0).attr('y',0)
                 .style('font-family', 'RijksoverheidSans').style('font-size', 13+'px').style('font-weight',200).attr("text-anchor", "start")
                 .attr('fill','#666')
@@ -438,7 +507,7 @@ function drawBackdrop(){
     
             posx = posx - 4;
             posy = posy + 18
-            diagramCanvas.append('text')
+            svgEnergiebalans.append('text')
                 .attr('x',0).attr('y',0)
                 .style('font-family', 'RijksoverheidSans').style('font-size', 13+'px').style('font-weight',200).attr("text-anchor", "middle")
                 .attr('fill','#AE114E')
@@ -460,14 +529,14 @@ function drawBackdrop(){
             var distance = 28;
             posx = i*distance + 233 + shiftRight;
             posy = spos + 222;
-            diagramCanvas.append('rect')
+            svgEnergiebalans.append('rect')
                 .attr('height',390).attr('width',20)
                 .attr('fill','#F4F9FB').style('opacity',1)
                 .attr('x',posx).attr('y',posy-175)
                 .attr('rx',5).attr('ry',5)
             posx = posx + 14;
             posy = posy - 100;
-            diagramCanvas.append('text')
+            svgEnergiebalans.append('text')
                 .attr('x',0).attr('y',0)
                 .attr('fill','#666')
                 .style('font-family', 'RijksoverheidSans').style('font-size', 14+'px').style('font-weight',200).attr("text-anchor", "start")
@@ -476,7 +545,7 @@ function drawBackdrop(){
     
             posx = posx - 4;
             posy = posy + 18
-            diagramCanvas.append('text')
+            svgEnergiebalans.append('text')
                 .attr('x',0).attr('y',0)
                 .style('font-family', 'RijksoverheidSans').style('font-size', 13+'px').style('font-weight',200).attr("text-anchor", "middle")
                 .attr('fill','#AE114E')
@@ -499,12 +568,12 @@ function drawBackdrop(){
             var distance = 26;
             posx = i*distance + 48 + shiftRight;
             posy = spos + 222;
-            diagramCanvas.append('rect')
+            svgEnergiebalans.append('rect')
                 .attr('height',390).attr('width',18)
                 .attr('fill','#F4F9FB').style('opacity',1)
                 .attr('x',posx).attr('y',posy - 175)
                 .attr('rx',5).attr('ry',5)
-            diagramCanvas.append('rect')
+            svgEnergiebalans.append('rect')
                 .attr('height',390).attr('width',18)
                 .attr('fill','#FFF').style('opacity',1)
                 .attr('x',posx).attr('y',posy - 175)
@@ -512,7 +581,7 @@ function drawBackdrop(){
     
             posx = posx + 14;
             posy = posy - 85;
-            diagramCanvas.append('text')
+            svgEnergiebalans.append('text')
                 .attr('x',0).attr('y',0)
                 .style('font-family', 'RijksoverheidSans').style('font-size', 13+'px').style('font-weight',580).attr("text-anchor", "start")
                 .attr('fill','#666')
@@ -520,7 +589,7 @@ function drawBackdrop(){
                 .text('Bruto mutatie')
         }
     
-        diagramCanvas.append('rect')
+        svgEnergiebalans.append('rect')
             .attr('id','WFDEnergyXaxis_line1')
             .attr('height',1).attr('width',149)
             .style('opacity',1)
@@ -528,7 +597,7 @@ function drawBackdrop(){
             .attr('x',677).attr('y',0)
             .attr('rx',2).attr('ry',2)
         
-            diagramCanvas.append('rect')
+            svgEnergiebalans.append('rect')
             .attr('id','WFDEnergyXaxis_line2')
             .attr('height',1).attr('width',124)
             .style('opacity',1)
@@ -539,29 +608,29 @@ function drawBackdrop(){
 
     drawLegendas();
     function drawLegendas(){
-        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 15, x:xposColumn2 -50 , y:columnStartPos - 85, pattern:false,fillColor:colorMap.mix, text:"Mix"})
-        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 15, x:xposColumn2 + 18, y: columnStartPos - 85 , pattern:false,fillColor:colorMap.gas, text:"Fossiel"})
-        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 15, x:xposColumn2 + 105, y:columnStartPos - 85 , pattern:false,fillColor: colorMap.elektriciteit, text:"Elektriciteit"})
-        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 15, x:xposColumn2 + 220,y: columnStartPos - 85, pattern:false,fillColor:colorMap.warmte, text:"Warmte"})
-        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 15, x:xposColumn2 + 320, y:columnStartPos- 85, pattern:false,fillColor:colorMap.waterstofGroen, text:"Groene waterstof"})
-        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 15, x: xposColumn2 + 465, y:columnStartPos - 85 , pattern:false,fillColor:colorMap.waterstofBlauw, text:"Blauwe waterstof"})
+        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 15, x:xposColumn2 -50 , y:columnStartPos - 85, pattern:false,fillColor:colorMap.mix, text:"Mix", targetSVG: "svgEnergiebalans"})
+        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 15, x:xposColumn2 + 18, y: columnStartPos - 85 , pattern:false,fillColor:colorMap.gas, text:"Fossiel", targetSVG: "svgEnergiebalans"})
+        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 15, x:xposColumn2 + 105, y:columnStartPos - 85 , pattern:false,fillColor: colorMap.elektriciteit, text:"Elektriciteit", targetSVG: "svgEnergiebalans"})
+        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 15, x:xposColumn2 + 220,y: columnStartPos - 85, pattern:false,fillColor:colorMap.warmte, text:"Warmte", targetSVG: "svgEnergiebalans"})
+        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 15, x:xposColumn2 + 320, y:columnStartPos- 85, pattern:false,fillColor:colorMap.waterstofGroen, text:"Groene waterstof", targetSVG: "svgEnergiebalans"})
+        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 15, x: xposColumn2 + 465, y:columnStartPos - 85 , pattern:false,fillColor:colorMap.waterstofBlauw, text:"Blauwe waterstof", targetSVG: "svgEnergiebalans"})
         
-        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 0, x: xposColumn2 + 265, y: startposCO2balans + 23, pattern:false,fillColor:'#527C63', text:"Reductie"})
-        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 0, x:  xposColumn2 + 365, y: startposCO2balans + 23, pattern:false,fillColor:'#78433B', text:"Toename"})
-        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 0, x: xposColumn2 + 465, y:startposCO2balans + 23, pattern:false,fillColor:'#2C6697', text:"Netto reductie/toename"})
+        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 0, x: xposColumn2 + 265, y: startposCO2balans + 23, pattern:false,fillColor:'#527C63', text:"Reductie", targetSVG: "svgCO2balans"})
+        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 0, x:  xposColumn2 + 365, y: startposCO2balans + 23, pattern:false,fillColor:'#78433B', text:"Toename", targetSVG: "svgCO2balans"})
+        drawLegendItem({opacity: 0.9, stroke: 'none', addWidth: 0, x: xposColumn2 + 465, y:startposCO2balans + 23, pattern:false,fillColor:'#2C6697', text:"Netto reductie/toename", targetSVG: "svgCO2balans"})
         
-        drawLegendItem({stroke: '#000', addWidth: 0, x: 30, y: 756, pattern:true, patternID:'url(#diagonal-stripe-white)',fillColor:'#333', text:""})
+        drawLegendItem({stroke: '#000', addWidth: 0, x: 30, y: 470+columnStartPos, pattern:true, patternID:'url(#diagonal-stripe-white)',fillColor:'#333', text:"", targetSVG: "svgEnergiebalans"})
         
-        diagramCanvas.append('text')
-            .attr('x',55).attr('y',768)
+        svgEnergiebalans.append('text')
+            .attr('x',55).attr('y',482+columnStartPos)
             .style('font-family', 'RijksoverheidSans').style('font-size', 14+'px').style('font-weight',800).attr("text-anchor", "start")
             .attr('fill','black')
             .text('Op gemarkeerde onderdelen ontbreekt nog cruciale informatie en zijn onzekere aannames toegepast. Zie de voetnoot voor nadere toelichting.')
         
-        drawLegendItem({stroke: '#000', addWidth: 0, x: 30, y: 1304, pattern:true, patternID:'url(#diagonal-stripe-white)',fillColor:'#333', text:""})
+        drawLegendItem({stroke: '#000', addWidth: 0, x: 30, y: 495, pattern:true, patternID:'url(#diagonal-stripe-white)',fillColor:'#333', text:"", targetSVG: "svgCO2balans"})
         
-        diagramCanvas.append('text')
-            .attr('x',55).attr('y',1316)
+        svgCO2balans.append('text')
+            .attr('x',55).attr('y',508)
             .style('font-family', 'RijksoverheidSans').style('font-size', 14+'px').style('font-weight',800).attr("text-anchor", "start")
             .attr('fill','black')
             .text('Op gemarkeerde onderdelen ontbreekt nog cruciale informatie en zijn onzekere aannames toegepast. Zie de voetnoot voor nadere toelichting.')
@@ -570,7 +639,7 @@ function drawBackdrop(){
             let width = 16;
             let height = 1;
 
-            diagramCanvas.append('rect')
+            window[config.targetSVG].append('rect')
                 .attr('width',width+ config.addWidth).attr('height',width)
                 .attr('x',config.x).attr('y',config.y)
                 .attr('fill', config.fillColor).style('opacity',config.opacity)
@@ -580,7 +649,7 @@ function drawBackdrop(){
             var posx = config.x + width +5 + config.addWidth;
             var posy = config.y + (height)/2+11;
 
-            diagramCanvas.append('text')
+            window[config.targetSVG].append('text')
                 .style('font-family', 'RijksoverheidSans').style('font-size', 13+'px').style('font-weight',200).attr("text-anchor", "start")
                 .attr('fill','black')
                 .text(config.text)
@@ -588,7 +657,7 @@ function drawBackdrop(){
                 .attr('transform','translate('+posx+','+posy+')')
 
             if (config.pattern){
-                diagramCanvas.append('rect')
+              window[config.targetSVG].append('rect')
                     .attr('width',width + config.addWidth).attr('height',width)
                     .attr('x',config.x).attr('y',config.y)
                     .attr('fill', config.patternID)
@@ -611,12 +680,14 @@ function drawSankey(config){
 
     let unit = '';
     // append the svg object to DOM
-    var svg = d3.select('#CESContentDiv').append("svg")
+    var svg = d3.select('#figuurEnergiebalans').append("svg")
         .attr('id','mainSVG')
         .style('position','absolute')
+        .style('pointer-events','none')
         .style('left','0px')
+        .style('top',columnStartPos-290+'px')
         .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom + height_textarea + 1000)
+        .attr("height", height + margin.top + margin.bottom)
         .append("g")
         .attr("transform","translate(" + margin.left + "," + margin.top + ")");
 
@@ -660,8 +731,17 @@ function drawSankey(config){
      function  generateCESDiagram(){
       //set up graph in same style as original example but empty
         // console.log(processedDataSet[clusterSelectie].algemeen)
-        d3.select('#hoofdTitel').text(processedDataSet[clusterSelectie].algemeen.titel).call(wrap_titles,560).attr('transform','translate(30,45)');
-        d3.select('#subTitel').text(processedDataSet[clusterSelectie].algemeen.subtitel).call(wrap_paragraph,950).attr('transform','translate(20,115)')
+        d3.select('#titel').html(processedDataSet[clusterSelectie].algemeen.titel);
+        d3.select('#versie').html(processedDataSet[clusterSelectie].algemeen.versie);
+        d3.select('#referentiejaar').html('Referentiejaar: <strong>' + processedDataSet[clusterSelectie].algemeen.referentiejaar +'</strong>')
+        d3.select('#zichtjaar').html('Zichtjaar: <strong>' + processedDataSet[clusterSelectie].algemeen.zichtjaar+'</strong>')
+        d3.select('#tekstAlgemeen').html(processedDataSet[clusterSelectie].algemeen.tekstAlgemeen);
+        d3.select('#kopEnergiebalans').html(processedDataSet[clusterSelectie].algemeen.kopEnergiebalans)
+        d3.select('#tekstEnergiebalans').html(processedDataSet[clusterSelectie].algemeen.tekstEnergiebalans)
+        d3.select('#kopCO2balans').html(processedDataSet[clusterSelectie].algemeen.kopCO2balans)
+        d3.select('#tekstCO2balans').html(processedDataSet[clusterSelectie].algemeen.tekstCO2balans)
+        console.log(document.getElementById('textEnergiebalans'))
+        // d3.select('#textEnergiebalans').html('ha')//processedDataSet[clusterSelectie].algemeen.subtitel).call(wrap_paragraph,950).attr('transform','translate(20,115)')
         d3.select('#diagramVersie').text('Versie '+ processedDataSet[clusterSelectie].algemeen.versie);
         d3.select('#eenheid_energie').text('Eenheid: '+ processedDataSet[clusterSelectie].algemeen.eenheid_energie);
         d3.select('#eenheid_co2').text('Eenheid: '+ processedDataSet[clusterSelectie].algemeen.eenheid_co2);
@@ -812,18 +892,8 @@ function drawSankey(config){
         .enter().append("g")
             .attr("class", "node");
 
-var defs = d3.selectAll('svg').append('defs');
-    defs.append('pattern').attr('id', 'diagonal-stripe').attr('patternUnits','userSpaceOnUse').attr('width',10).attr('height',10).append('path').attr('d', 'M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2').style('stroke','white').style('stroke-width',2).attr('fill','black');
-    defs.append('pattern').attr('id', 'diagonal-stripe-red').attr('patternUnits','userSpaceOnUse').attr('width',10).attr('height',10).append('path').attr('d', 'M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2').style('stroke','#B66862').style('stroke-width',2).attr('fill','black');
-    defs.append('pattern').attr('id', 'diagonal-stripe-white').attr('patternUnits','userSpaceOnUse').attr('width',10).attr('height',10).append('path').attr('d', 'M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2').style('stroke','white').style('stroke-width',2).attr('fill','red');
-    
-    defs.append('pattern').attr('id', 'diagonal-stripe-purple').attr('patternUnits','userSpaceOnUse').attr('width',10).attr('height',10).append('path').attr('d', 'M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2').style('stroke','#9F264F').style('stroke-width',4).attr('fill','black');
-    defs.append('pattern').attr('id', 'diagonal-stripe-green').attr('patternUnits','userSpaceOnUse').attr('width',10).attr('height',10).append('path').attr('d', 'M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2').style('stroke','#527C63').style('stroke-width',4).attr('fill','black');
-    defs.append('pattern').attr('id', 'diagonal-stripe-yellow').attr('patternUnits','userSpaceOnUse').attr('width',10).attr('height',10).append('path').attr('d', 'M-1,1 l2,-2 M0,10 l10,-10 M9,11 l2,-2').style('stroke','#D8A980').style('stroke-width',4).attr('fill','black');
-    
-    defs.append('pattern').attr('id', 'dots').attr('patternUnits','userSpaceOnUse').attr('width',6).attr('height',6).append('circle').attr('cx',1.5).attr('cy',1.5).attr('r',0.6).attr('fill','')
-    defs.append('pattern').attr('id', 'dots2').attr('patternUnits','userSpaceOnUse').attr('width',6).attr('height',6).append('circle').attr('cx',1.5).attr('cy',1.5).attr('r',3).attr('fill','white')
-    
+  appendPatterns();
+            
     // draw nodes backdrop fill
     let shiftXlastnode = 0;
         node.append("rect")
@@ -936,8 +1006,8 @@ var defs = d3.selectAll('svg').append('defs');
             processedDataSet[config.clusterSelectie].substitutie.watervaldiagram.unshift({title: "reference total", value: parseInt(captureFirstNodePosition.value)}) // add reference total to array
             
             d3.select('#WFDEnergyXaxis_text').attr('y',captureFirstNodePosition.y1+409)
-            d3.select('#WFDEnergyXaxis_line1').attr('y',captureFirstNodePosition.y1+425)
-            d3.select('#WFDEnergyXaxis_line2').attr('y',captureFirstNodePosition.y1+425)
+            d3.select('#WFDEnergyXaxis_line1').attr('y',captureFirstNodePosition.y1+135+columnStartPos)
+            d3.select('#WFDEnergyXaxis_line2').attr('y',captureFirstNodePosition.y1+135+columnStartPos)
 
             for (i=0;i<EnergieBesparingWFDiagramData.length;i++){
                 svg.append('rect')
@@ -1021,7 +1091,7 @@ function drawWaterfallCO2(){
     const padding = 0.3;
 
 
-    diagramCanvas.append("text")
+    svgCO2balans.append("text")
         .attr('x',30).attr('y',startposCO2balans+40)
         .style('font-family', 'RijksoverheidSans').style('font-size', 20+'px').attr("text-anchor", "start")
         .style('font-weight',800)
@@ -1042,7 +1112,7 @@ function drawWaterfallCO2(){
         return d;
       });
     
-    const chart = diagramCanvas
+    const chart = svgCO2balans
 
       .append('g')
       .attr('width', width + margin.left + margin.right)
@@ -1217,7 +1287,7 @@ function drawWaterfallEnergie(config){
     const padding = 0.3;
 
 
-    diagramCanvas.append("text")
+    svgCO2balans.append("text")
     .attr('x',30).attr('y',startposCO2balans+40)
     .style('font-family', 'RijksoverheidSans').style('font-size', 20+'px').style('font-weight',800).attr("text-anchor", "start")
     .text('CO2-balans')
@@ -1239,7 +1309,7 @@ function drawWaterfallEnergie(config){
         return d;
         });
     
-    const chart = diagramCanvas
+    const chart = svgEnergiebalans
         .append('g')
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom)
@@ -1421,31 +1491,70 @@ function drawNotes(){
     let maxwidth = 900;
     
     // console.log(noteCounterArray)
+    d3.select('#voetnoten').append('div').html('Voetnoten').attr('style','margin-bottom:30px; margin-top:50px; margin-left:50px; font-size:24px; font-weight:800;')
 
     for (j=0; j<noteCounterArray.length; j++){
-        diagramCanvas.append('text')
-            .style('font-family', 'RijksoverheidSans')
-            .attr('x',0-margin.left+shiftX+20)
-            .attr('y',function(){return height+shiftY+regelCounter*lineheight})
-            .attr('font-size','14px')
-            .attr('font-weight',800)
-            .attr("text-anchor", "end")
-            .attr('fill','#AE114E')
-            .text('['+(j+1)+']');
-        var posy = height+shiftY+regelCounter*lineheight;
-        var posx = -margin.left + 25 + shiftX + 10
-        // console.log(noteCounterArray)
-        diagramCanvas.append('text')
-            .style('font-family', 'RijksoverheidSans')
-            .attr('font-size','14px')
-            .attr('font-weight',400)
-            .attr("text-anchor", "start")
-            .attr('fill','black')
-            .text(noteCounterArray[j])
-            .call(wrap_notes,maxwidth)
-            .attr('transform',function(){return 'translate(' + posx + ','+ posy + ')'})
-        regelCounter += aantalregels;
-        }
+      d3.select('#voetnoten').append('div')
+        .attr('id','voetnoot_'+j)
+        .style('padding','0.5rem 2rem')
+
+      d3.select('#voetnoot_'+j).append('div')
+        .style('display','inline-block')
+        .style('vertical-align','top')
+        .style('color','#AE114E')
+        .style('width','4%')
+        .style('text-align','right')
+        .style('margin-right','1%')
+        .style('font-size','16px')
+        .html('['+(j+1)+']');
+        
+
+      d3.select('#voetnoot_'+j).append('div')
+        .style('display','inline-block')
+        .style('vertical-align','top')
+        .style('color','#000')
+        .style('width','95%')
+        .style('font-size','16px')
+        .html(noteCounterArray[j]);
+      }
+      d3.select('#voetnoten').append('div')
+      .attr('id','voetnoot_x')
+      .style('padding','0.5rem 2rem')
+      d3.select('#voetnoot_x').append('div')
+      .style('display','inline-block')
+      .style('vertical-align','top')
+      .style('color','#000')
+      .style('width','95%')
+      .style('height','20px')
+      .style('font-size','16px')
+      .html('');
+
+      // d3.select('#voetnoten').append('div').attr('style','height:100px; margin-top:50px; margin-left:50px; font-size:24px; font-weight:800;')
+
+    // for (j=0; j<noteCounterArray.length; j++){
+    //     diagramCanvas.append('text')
+    //         .style('font-family', 'RijksoverheidSans')
+    //         .attr('x',0-margin.left+shiftX+20)
+    //         .attr('y',function(){return height+shiftY+regelCounter*lineheight})
+    //         .attr('font-size','14px')
+    //         .attr('font-weight',800)
+    //         .attr("text-anchor", "end")
+    //         .attr('fill','#AE114E')
+    //         .text('['+(j+1)+']');
+    //     var posy = height+shiftY+regelCounter*lineheight;
+    //     var posx = -margin.left + 25 + shiftX + 10
+    //     // console.log(noteCounterArray)
+    //     diagramCanvas.append('text')
+    //         .style('font-family', 'RijksoverheidSans')
+    //         .attr('font-size','14px')
+    //         .attr('font-weight',400)
+    //         .attr("text-anchor", "start")
+    //         .attr('fill','black')
+    //         .text(noteCounterArray[j])
+    //         .call(wrap_notes,maxwidth)
+    //         .attr('transform',function(){return 'translate(' + posx + ','+ posy + ')'})
+    //     regelCounter += aantalregels;
+    //     }
 } // drawNotes()
 
 //functie wrap_titles(); textwrapper voor titel

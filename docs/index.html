@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="/favicon.ico" />
+  <!-- <link rel="icon" href="/favicon.ico" /> -->
   <!-- Material Icons -->
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
   <!-- Roboto -->
@@ -18,35 +18,141 @@
   <script src="src/assets/js/d3.sankey.edit.js"></script>
   <script src="src/assets/js/ces.sankey.js"></script>
   <script src="src/assets/js/xlsx.js"></script>
+  <script src="src/assets/js/html2canvas.min.js"></script>
   <script src="src/assets/js/dataloader.js"></script>
 
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Svelte + TS + Vite App</title>
-  <script type="module" crossorigin src="/assets/index.de73c096.js"></script>
-  <link rel="stylesheet" href="/assets/index.0e51e9d4.css">
+  <title>Visualisatietoolkit Energie en CO2 balans</title>
+  <script type="module" crossorigin src="/assets/index.6fa664c2.js"></script>
+  <link rel="stylesheet" href="/assets/index.774d5b3e.css">
 </head>
 
 <script>
-  var flag_CESCustomDatasetLoaded = false;
+  var flag_CESCustomDatassetLoaded = false;
   var CESCustomDataSet;
   var processedDataSet = {};
+
 </script>
 
 <body>
+  <div style="z-index:10;position: sticky; top:-15px; left:50%; width:500px;margin:auto;">
+    <div id="title" class="noprint"></div>
+    <div id="clusterSelector" class="noprint"></div>
+  </div>
+  <div id="header" class="noprint">
+  </div>
   <div id="app">
-    <div id="title"></div>
-    <div id="logo"></div>
 
-    <div id="header">
-      <div id="clusterSelector"></div>
-    </div>
+    <div id="logo" class="noprint"></div>
     <div id="main">
-      <div id="page"></div>
+      <!-- <div style="position:absolute; top:0px;"> -->
+
+      <!-- </div> -->
+
+      <div id="page">
+        <div id="sjabloon" class="noprint"></div>
+        <div id="loading" class="noprint"></div>
+        <div id="menu" class="noprint"></div>
+        <div id="start" class="noprint"></div>
+      </div>
+      <!-- <div id="spacer"></div> -->
     </div>
-    <div id="footer"></div>
+
+    <div id="footer" class="noprint">
+    </div>
 
   </div>
+
+
+  <script>
+
+    document.addEventListener("dragover", function (event) {
+      event.preventDefault();
+      console.log('Attempting to drop...')
+    });
+
+    document.addEventListener("drop", function (event) {
+      event.preventDefault();
+      event.stopPropagation();
+
+
+      var files = event.dataTransfer.files;
+      //geeft wel  de delimiter terug en een json
+      console.log(files)
+      var XLSXfile = files[0];
+
+      var file = XLSXfile;
+      reader = new FileReader();
+      reader.onload = function (event) {
+        console.log(event.target.result);
+        loadDataViaDragDrop(event.target.result);
+        //holder.style.background = 'url(' + event.target.result + ') no-repeat center';
+
+      };
+
+      console.log(file);
+      reader.readAsArrayBuffer(file);
+
+
+
+
+      //   var url = "/src/assets/test.xlsx";
+      // /* set up async GET request */
+      // var req = new XMLHttpRequest();
+      // req.open("GET", url, true);
+      // req.responseType = "arraybuffer";
+
+
+
+
+      // var rawDataInput;
+
+      // req.onload = function(e) {
+      //   console.log(req.response)
+      //   var workbook = XLSX.read(req.response);
+      //   rawDataInput = XLSX.utils.sheet_to_json(workbook.Sheets['Sheet1']);
+      //   processData(rawDataInput)
+      // };
+
+
+      // Papa.parse(CSVfile, {
+      //   header: true,
+      //   before: function (CSVfile, inputElem) { console.log('Attempting to Parse...') },
+      //   error: function (err, CSVfile, inputElem, reason) { console.log(err); },
+      //   complete: function (results, CSVfile) {
+
+      //     switch (CSVfile.name) {
+      //       case 'CES.csv':
+      //         console.log('%c Load CES-data CSV (' + printvalue.name + ')', 'background: #222; color: #ff0000');
+      //         CESCustomDataSet = results.data;
+      //         flag_CESCustomDatasetLoaded = true;
+      //         break;
+      //       default:
+      //         console.log('%c Load Kaartlagen-data CSV (' + printvalue.name + ')', 'background: #222; color: #ff0000');
+      //         var key = 'fillColor';
+      //         fieldSeparatorTest = results.meta.delimiter;
+      //         var start = laagKenmerken.length;
+      //         laagKenmerken = laagKenmerken.concat(results.data);
+      //         console.log(JSON.stringify(laagKenmerken));
+      //         console.log('laagKenmerken[0]=' + JSON.stringify(eval(laagKenmerken[0])));
+      //         console.log($(jQuery.parseJSON(JSON.stringify(laagKenmerken))).each(function () {
+      //           return this.laagNaam;
+      //         }));
+      //         console.table(laagKenmerken);
+
+
+      //         updateLayers(start);//only layers from import are updated
+      //         updateLegend(); //all (new from csv and old)are updated
+      //     }
+
+      //     return;
+      //   }
+      // });
+    });
+
+
+  </script>
 
 
   

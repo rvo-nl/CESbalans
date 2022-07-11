@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
 
   onMount(() => {
-    setTimeout(godoit, 1000);
+    // setTimeout(godoit, 1000);
 
     function godoit() {
       tekenCESDiagrammen({

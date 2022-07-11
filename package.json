@@ -12,6 +12,8 @@
   },
   "devDependencies": {
     "@smui/button": "^6.0.0-beta.16",
+    "@smui/circular-progress": "^6.0.0-beta.16",
+    "@smui/dialog": "^6.0.0-beta.16",
     "@smui/list": "^6.0.0-beta.16",
     "@smui/menu": "^6.0.0-beta.16",
     "@smui/menu-surface": "^6.0.0-beta.16",
@@ -24,5 +26,11 @@
     "tslib": "^2.3.1",
     "typescript": "^4.5.4",
     "vite": "^2.9.9"
+  },
+  "dependencies": {
+    "@mdi/font": "^6.7.96",
+    "@mdi/js": "^6.7.96",
+    "path": "^0.12.7",
+    "svelte-material-icons": "^2.0.2"
   }
 }

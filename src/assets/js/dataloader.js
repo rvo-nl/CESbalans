@@ -1,31 +1,89 @@
-var url = "/src/assets/test.xlsx";
+
+var processedDataSet;
+var clusterLoadState = {};
+var loadInitFlag = true;
+var rawDataInput;
+
+
+function loadDataViaDragDrop(data){
+  console.log(data)
+  var workbook = XLSX.read(data);
+  rawDataInput = XLSX.utils.sheet_to_json(workbook.Sheets['Sheet1']);
+  console.log(rawDataInput)
+  processData(rawDataInput)
+
+    setTimeout(godoit, 1000);
+
+    function godoit() {
+      tekenCESDiagrammen({
+        // datapath: "/src/assets/CES.csv",
+        targetDiv: "page",
+        clusterSelectie: Object.keys(processedDataSet)[0],
+      });
+      initClusterSelector();
+  }
+}
+
+
+
+function loadDataViaURL(url){
 /* set up async GET request */
 var req = new XMLHttpRequest();
 req.open("GET", url, true);
 req.responseType = "arraybuffer";
-var processedDataSet;
-var processedDataSet_original;
-
-var LoadInitFlag = false;
-var clusterLoadState = {};
-
-var rawDataInput;
-
 req.onload = function(e) {
+  console.log(req.response)
   var workbook = XLSX.read(req.response);
   rawDataInput = XLSX.utils.sheet_to_json(workbook.Sheets['Sheet1']);
   processData(rawDataInput)
 };
 req.send();
+setTimeout(godoit, 100); // DEZE AANPASSEN BIJ DEPLOY
+
+function godoit() {
+  tekenCESDiagrammen({
+    // datapath: "/src/assets/CES.csv",
+    targetDiv: "page",
+    clusterSelectie: Object.keys(processedDataSet)[0]
+  });
+  initClusterSelector();
+}
+
+}
+
+// loadDataViaURL();
+
+function loadDataViaButton(){
+
+}
 
 
 function processData(rawDataInput){
-console.log(rawDataInput)
+  if (loadInitFlag){
+    d3.select('#app').style('min-height','3000px');
+    d3.select('#menu').remove();  
+    d3.select('#start').remove();
+    d3.select('#clusterSelector').style('transform','scale(0)')
+    setTimeout(function(){d3.select('#clusterSelector').transition().duration(250).style('opacity',1).style('transform','scale(1)')},1000);
+    d3.select('#loading').style('visibility','visible');
+    setTimeout(function(){d3.select('#loading').style('visibility','hidden');},2000);
+    d3.select('#sjabloon').remove();
+    d3.select('#page').style('background-color','#eceff1')
+    d3.select('#page').style('border-width','5px')
+    d3.select('#page').style('box-shadow','rgba(0, 0, 0, 0.35) 0px 5px 15px')
+    d3.select('#subtitle').remove();
+    
+    // d3.select('#page').style('border-width','5px')
+    loadInitFlag = false;
+
+    setTimeout(function(){appendPatterns();},6000);
+
+  }
+
   var datadict = {};
   processedDataSet = {}
 
   var sankeydata;
-   
 
   // list clusters
   for (i=0;i<rawDataInput.length;i++){
@@ -187,6 +245,9 @@ console.log(rawDataInput)
       
     }; // prepDataCO2WFD(){}
 
+    console.log()
+    d3.select('#statusMessage').html("Status: "+Object.keys(processedDataSet).length+" clusters ingeladen");
+
 
     // for (h=0;h<Object.keys(datadict).length;h++){
     //   var currentCluster = Object.keys(processedDataSet)[h];
@@ -205,7 +266,7 @@ console.log(rawDataInput)
   //   // console.log(processedDataSet[currentCluster].substitutie.watervaldiagram)
   // }
   
-
+  // d3.select('#loading').style('visibility','hidden');
 
 };
 
