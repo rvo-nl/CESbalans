@@ -12,7 +12,7 @@ function loadDataViaDragDrop(data){
   console.log(rawDataInput)
   processData(rawDataInput)
 
-    setTimeout(godoit, 1000);
+    setTimeout(godoit, 3000);
 
     function godoit() {
       tekenCESDiagrammen({
