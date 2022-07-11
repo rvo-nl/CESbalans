@@ -4998,7 +4998,7 @@ div.tooltip {
 
 @font-face {
   font-family: RijksoverheidSans;
-  src: url(assets/ROsanswebtextregular.b6b41e99.eot?) format("embedded-opentype"), url(assets/ROsanswebtextregular.54039c08.woff) format("opentype");
+  src: url(ROsanswebtextregular.b6b41e99.eot?) format("embedded-opentype"), url(ROsanswebtextregular.54039c08.woff) format("opentype");
   font-style: normal;
   font-weight: 400
 }
@@ -5012,7 +5012,7 @@ div.tooltip {
 
 @font-face {
   font-family: RijksoverheidSans;
-  src: url(srcassets/onts/ROsanswebtextbold.eot?) format("embedded-opentype"), url(assets/ROsanswebtextbold.27c09414.woff) format("opentype");
+  src: url(ROsanswebtextbold.eot?) format("embedded-opentype"), url(ROsanswebtextbold.27c09414.woff) format("opentype");
   font-weight: 700;
   font-style: normal
 }
