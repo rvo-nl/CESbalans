@@ -1202,7 +1202,7 @@ function drawWaterfallCO2(){
         })
 
     bar.append('text')
-        .attr('x',8).attr('y',-50)
+        .attr('x',6).attr('y',-47)
         .style('font-family', 'RijksoverheidSans').style('font-size', 12+'px').style('font-weight',800)
         .attr('fill','#AE114E')
         .attr("text-anchor", "middle")
